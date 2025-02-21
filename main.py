@@ -58,6 +58,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "ll": self.get_coords_from_geocoder(self.lineEdit.text()) if self.lineEdit.text() else ','.join(map(str, self.map_ll)),
             "l": self.map_l,
             'z': self.map_zoom,
+            'pt': self.get_coords_from_geocoder(self.lineEdit.text()) if self.lineEdit.text() else ','.join(map(str, self.map_ll)),
             'theme': self.theme,
             'apikey': '92bf06ed-e9bb-4a7b-8b91-23cf32fb910d'
         }
