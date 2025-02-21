@@ -60,7 +60,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'z': self.map_zoom,
             'pt': self.get_coords_from_geocoder(self.lineEdit.text()) if self.lineEdit.text() else ','.join(map(str, self.map_ll)),
             'theme': self.theme,
-            'apikey': '92bf06ed-e9bb-4a7b-8b91-23cf32fb910d'
+            'apikey': '92bf06ed-e9bb-4a7b-8b91-23cf32fb910d',
+
         }
         s = requests.Session()
 
@@ -90,7 +91,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.map_ll[1] -= self.press_delta
         if key == Qt.Key.Key_Return:
             self.refresh_map()
-            self.lineEdit.setText('')
             return
 
         self.refresh_map()
