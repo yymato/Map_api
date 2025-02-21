@@ -7,7 +7,6 @@ from ui import Ui_MainWindow
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    g_map: QLabel
 
     def __init__(self):
         super().__init__()
@@ -33,7 +32,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         pixmap = QPixmap()
         pixmap.load('tmp.png')
-        self.g_map.setPixmap(pixmap)
+        self.map_label.setPixmap(pixmap)
 
 
 app = QApplication(sys.argv)
