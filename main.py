@@ -1,4 +1,6 @@
 import sys
+
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow
 import requests
@@ -33,6 +35,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pixmap = QPixmap()
         pixmap.load('tmp.png')
         self.map_label.setPixmap(pixmap)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_PageUp and self.map_zoom < 17:
+            self.map_zoom += 1
+        elif event.key() == Qt.Key.Key_PageDown and self.map_zoom > 0:
+            self.map_zoom -= 1
+        print(self.map_zoom)
+        self.refresh_map()
 
 
 app = QApplication(sys.argv)
