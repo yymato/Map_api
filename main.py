@@ -29,8 +29,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "l": self.map_l,
             'z': self.map_zoom
         }
+        s = requests.Session()
 
-        response = requests.get('https://static-maps.yandex.ru/1.x/', params=map_params)
+
+        response = s.get('https://static-maps.yandex.ru/1.x/', params=map_params)
         with open('tmp.png', mode='wb') as tmp:
             tmp.write(response.content)
 
