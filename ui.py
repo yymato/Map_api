@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
+        MainWindow.resize(1046, 600)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.map_label = QtWidgets.QLabel(parent=self.centralwidget)
@@ -21,9 +21,12 @@ class Ui_MainWindow(object):
         self.theme_button = QtWidgets.QPushButton(parent=self.centralwidget)
         self.theme_button.setGeometry(QtCore.QRect(710, 10, 75, 23))
         self.theme_button.setObjectName("theme_button")
+        self.lineEdit = QtWidgets.QLineEdit(parent=self.centralwidget)
+        self.lineEdit.setGeometry(QtCore.QRect(710, 50, 201, 20))
+        self.lineEdit.setObjectName("lineEdit")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1046, 21))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
