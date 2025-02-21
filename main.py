@@ -15,24 +15,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         self.press_delta = 0.00001
-
+        self.theme = 'light'
         self.map_zoom = 5
         self.map_ll = [37.977751, 55.757718]
         self.map_l = 'map'
         self.map_key = ''
+        self.theme_button.clicked.connect(self.change_theme)
+        self.refresh_map()
 
+    def change_theme(self):
+        self.theme = 'light' if self.theme != 'light' else 'dark'
         self.refresh_map()
 
     def refresh_map(self):
         map_params = {
             "ll": ','.join(map(str, self.map_ll)),
             "l": self.map_l,
-            'z': self.map_zoom
+            'z': self.map_zoom,
+            'theme': self.theme,
+            'apikey': '92bf06ed-e9bb-4a7b-8b91-23cf32fb910d'
         }
         s = requests.Session()
 
 
-        response = s.get('https://static-maps.yandex.ru/1.x/', params=map_params)
+        response = s.get('https://static-maps.yandex.ru/v1', params=map_params)
+        print(response.url)
         with open('tmp.png', mode='wb') as tmp:
             tmp.write(response.content)
 

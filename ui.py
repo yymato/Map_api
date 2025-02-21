@@ -16,8 +16,11 @@ class Ui_MainWindow(object):
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.map_label = QtWidgets.QLabel(parent=self.centralwidget)
-        self.map_label.setGeometry(QtCore.QRect(10, 10, 751, 531))
+        self.map_label.setGeometry(QtCore.QRect(10, 10, 681, 531))
         self.map_label.setObjectName("map_label")
+        self.theme_button = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.theme_button.setGeometry(QtCore.QRect(710, 10, 75, 23))
+        self.theme_button.setObjectName("theme_button")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
@@ -34,3 +37,4 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.map_label.setText(_translate("MainWindow", "TextLabel"))
+        self.theme_button.setText(_translate("MainWindow", "Сменить тему"))
