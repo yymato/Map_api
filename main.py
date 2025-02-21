@@ -21,6 +21,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.map_l = 'map'
         self.map_key = ''
         self.theme_button.clicked.connect(self.change_theme)
+        self.reset_button.clicked.connect(self.reset_result)
+        self.refresh_map()
+
+    def reset_result(self):
+        self.lineEdit.setText('')
         self.refresh_map()
 
     def get_coords_from_geocoder(self, toponym_to_find):
