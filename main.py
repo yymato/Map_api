@@ -14,6 +14,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
+        self.press_delta = 0.00001
+
         self.map_zoom = 5
         self.map_ll = [37.977751, 55.757718]
         self.map_l = 'map'
@@ -37,11 +39,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.map_label.setPixmap(pixmap)
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key.Key_PageUp and self.map_zoom < 17:
+        key = event.key()
+        if key == Qt.Key.Key_PageUp and self.map_zoom < 17:
             self.map_zoom += 1
-        elif event.key() == Qt.Key.Key_PageDown and self.map_zoom > 0:
+        if key == Qt.Key.Key_PageDown and self.map_zoom > 0:
             self.map_zoom -= 1
-        print(self.map_zoom)
+        if key == Qt.Key.Key_Left:
+            self.map_ll[0] -= self.press_delta
+        if key == Qt.Key.Key_Right:
+            self.map_ll[0] += self.press_delta
+        if key == Qt.Key.Key_Up:
+            self.map_ll[1] += self.press_delta
+        if key == Qt.Key.Key_Down:
+            self.map_ll[1] -= self.press_delta
+
         self.refresh_map()
 
 
