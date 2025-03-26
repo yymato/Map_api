@@ -1,5 +1,6 @@
 import sys
 
+from Cython import address
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow
@@ -18,7 +19,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.theme = 'light'
         self.map_zoom = 5
         self.map_ll = [37.977751, 55.757718]
-        self.point = [37.977751, 55.757718]
+        self.point = ','.join(list(map(str, [37.977751, 55.757718])))
         self.map_l = 'map'
         self.map_key = ''
         self.theme_button.clicked.connect(self.change_theme)
@@ -27,9 +28,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def reset_result(self):
         self.lineEdit.setText('')
+        self.plainTextEdit.setPlainText('')
+        self.map_ll = [37.977751, 55.757718]
+        self.point = ','.join(list(map(str, [37.977751, 55.757718])))
         self.refresh_map()
 
-    def get_coords_from_geocoder(self, toponym_to_find):
+    def get_coords_from_geocoder(self, toponym_to_find, address=False):
         geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
 
         geocoder_params = {
@@ -49,6 +53,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
         # Координаты центра топонима:
         toponym_coodrinates = toponym["Point"]["pos"]
+        if address:
+            return toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
 
         # Долгота и широта:
         toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
@@ -61,16 +67,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def refresh_map(self):
         map_params = {
-            "ll": self.get_coords_from_geocoder(self.lineEdit.text()) if self.lineEdit.text() else ','.join(map(str, self.map_ll)),
+            "ll": ','.join(map(str, self.map_ll)),
             "l": self.map_l,
             'z': self.map_zoom,
-            'pt': self.get_coords_from_geocoder(self.lineEdit.text()) if self.lineEdit.text() else ','.join(map(str, self.point)),
+            'pt': self.point,
             'theme': self.theme,
             'apikey': '92bf06ed-e9bb-4a7b-8b91-23cf32fb910d',
 
         }
         if self.lineEdit.text():
             self.point = self.get_coords_from_geocoder(self.lineEdit.text())
+            self.map_ll = list(map(float, self.point.split(',')))
+            self.plainTextEdit.setPlainText(self.get_coords_from_geocoder(self.point, address=True))
         s = requests.Session()
 
 
@@ -82,6 +90,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pixmap = QPixmap()
         pixmap.load('tmp.png')
         self.map_label.setPixmap(pixmap)
+
+
 
     def keyPressEvent(self, event):
         key = event.key()
