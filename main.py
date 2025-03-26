@@ -14,10 +14,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
-        self.press_delta = 0.00001
+        self.press_delta = 0.1
         self.theme = 'light'
         self.map_zoom = 5
         self.map_ll = [37.977751, 55.757718]
+        self.point = [37.977751, 55.757718]
         self.map_l = 'map'
         self.map_key = ''
         self.theme_button.clicked.connect(self.change_theme)
@@ -63,11 +64,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "ll": self.get_coords_from_geocoder(self.lineEdit.text()) if self.lineEdit.text() else ','.join(map(str, self.map_ll)),
             "l": self.map_l,
             'z': self.map_zoom,
-            'pt': self.get_coords_from_geocoder(self.lineEdit.text()) if self.lineEdit.text() else ','.join(map(str, self.map_ll)),
+            'pt': self.get_coords_from_geocoder(self.lineEdit.text()) if self.lineEdit.text() else ','.join(map(str, self.point)),
             'theme': self.theme,
             'apikey': '92bf06ed-e9bb-4a7b-8b91-23cf32fb910d',
 
         }
+        if self.lineEdit.text():
+            self.point = self.get_coords_from_geocoder(self.lineEdit.text())
         s = requests.Session()
 
 
