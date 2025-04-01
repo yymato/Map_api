@@ -1,4 +1,5 @@
 import sys
+from math import degrees, atan, sinh, pi
 
 from Cython import address
 from PyQt6.QtCore import Qt
@@ -36,6 +37,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                                                           index=self.checkBox.isChecked()))
             self.refresh_map()
 
+    def searc2(self):
+        if self.lineEdit.text():
+            self.point = self.get_coords_from_geocoder(self.lineEdit.text())
+            self.plainTextEdit.setPlainText(self.get_coords_from_geocoder(self.point, address=True,
+                                                                          index=self.checkBox.isChecked()))
+            self.refresh_map()
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton and self.map_label.geometry().contains(event.pos()):
+            print(1)
+            x, y = event.pos().x(), event.pos().y()
+
+            left_map = self.map_label.geometry().left()
+            width_map = self.map_label.geometry().width()
+            top_map = self.map_label.geometry().top()
+            height_map = self.map_label.geometry().height()
+
+            cursor_x = (x - left_map) / width_map
+            cursor_y = (y - top_map) / height_map
+
+            k = 2
+            lon = self.map_ll[0] - (360 / (k ** (self.map_zoom - 1)) / 2) + cursor_x * 360 / (k ** (self.map_zoom - 1))
+            lat = self.map_ll[1] + (180 / (k ** (self.map_zoom - 1)) / 2) - cursor_y * 180 / (k ** (self.map_zoom - 1))
+
+            self.lineEdit.setText(f'{lon}, {lat}')
+            self.searc2()
+
+
     def reset_result(self):
         self.lineEdit.setText('')
         self.plainTextEdit.setPlainText('')
@@ -65,15 +94,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         toponym_coodrinates = toponym["Point"]["pos"]
         if address:
             if index:
-                return (toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted'] + ', ' +
+                try:
+                    return (toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted'] + ', ' +
                         toponym['metaDataProperty']['GeocoderMetaData']['Address']["postal_code"])
+                except Exception:
+                    return toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
             return toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
 
         # Долгота и широта:
         toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
         self_point = f'{toponym_longitude},{toponym_lattitude}'
         return self_point
-
 
     def change_theme(self):
         self.theme = 'light' if self.theme != 'light' else 'dark'
