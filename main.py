@@ -74,6 +74,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self_point = f'{toponym_longitude},{toponym_lattitude}'
         return self_point
 
+
     def change_theme(self):
         self.theme = 'light' if self.theme != 'light' else 'dark'
         self.refresh_map()
