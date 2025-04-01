@@ -1,4 +1,5 @@
 # Form implementation generated from reading ui file 'ui.ui'
+# Form implementation generated from reading ui file 'ui.ui'
 #
 # Created by: PyQt6 UI code generator 6.7.1
 #
@@ -34,6 +35,12 @@ class Ui_MainWindow(object):
         self.plainTextEdit.setGeometry(QtCore.QRect(700, 290, 311, 191))
         self.plainTextEdit.setReadOnly(True)
         self.plainTextEdit.setObjectName("plainTextEdit")
+        self.checkBox = QtWidgets.QCheckBox(parent=self.centralwidget)
+        self.checkBox.setGeometry(QtCore.QRect(710, 160, 231, 31))
+        self.checkBox.setObjectName("checkBox")
+        self.search = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.search.setGeometry(QtCore.QRect(930, 50, 75, 23))
+        self.search.setObjectName("search")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1046, 21))
@@ -53,3 +60,5 @@ class Ui_MainWindow(object):
         self.theme_button.setText(_translate("MainWindow", "Сменить тему"))
         self.reset_button.setText(_translate("MainWindow", "Сброс результата"))
         self.label.setText(_translate("MainWindow", "Адрес"))
+        self.checkBox.setText(_translate("MainWindow", "Показывать индекс"))
+        self.search.setText(_translate("MainWindow", "поиск"))

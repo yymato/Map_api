@@ -24,7 +24,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.map_key = ''
         self.theme_button.clicked.connect(self.change_theme)
         self.reset_button.clicked.connect(self.reset_result)
+        self.search.clicked.connect(self.searc1)
+        self.checkBox.stateChanged.connect(self.searc1)
         self.refresh_map()
+
+    def searc1(self):
+        if self.lineEdit.text():
+            self.point = self.get_coords_from_geocoder(self.lineEdit.text())
+            self.map_ll = list(map(float, self.point.split(',')))
+            self.plainTextEdit.setPlainText(self.get_coords_from_geocoder(self.point, address=True,
+                                                                          index=self.checkBox.isChecked()))
+            self.refresh_map()
 
     def reset_result(self):
         self.lineEdit.setText('')
@@ -33,7 +43,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.point = ','.join(list(map(str, [37.977751, 55.757718])))
         self.refresh_map()
 
-    def get_coords_from_geocoder(self, toponym_to_find, address=False):
+    def get_coords_from_geocoder(self, toponym_to_find, address=False, index=False):
         geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
 
         geocoder_params = {
@@ -54,6 +64,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Координаты центра топонима:
         toponym_coodrinates = toponym["Point"]["pos"]
         if address:
+            if index:
+                return (toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted'] + ', ' +
+                        toponym['metaDataProperty']['GeocoderMetaData']['Address']["postal_code"])
             return toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
 
         # Долгота и широта:
@@ -75,14 +88,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'apikey': '92bf06ed-e9bb-4a7b-8b91-23cf32fb910d',
 
         }
-        if self.lineEdit.text():
-            self.point = self.get_coords_from_geocoder(self.lineEdit.text())
-            self.map_ll = list(map(float, self.point.split(',')))
-            self.plainTextEdit.setPlainText(self.get_coords_from_geocoder(self.point, address=True))
-        s = requests.Session()
 
 
-        response = s.get('https://static-maps.yandex.ru/v1', params=map_params)
+
+        response = requests.get('https://static-maps.yandex.ru/v1', params=map_params)
         print(response.url)
         with open('tmp.png', mode='wb') as tmp:
             tmp.write(response.content)
@@ -90,8 +99,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pixmap = QPixmap()
         pixmap.load('tmp.png')
         self.map_label.setPixmap(pixmap)
-
-
 
     def keyPressEvent(self, event):
         key = event.key()
@@ -107,14 +114,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.map_ll[1] += self.press_delta
         if key == Qt.Key.Key_Down:
             self.map_ll[1] -= self.press_delta
-        if key == Qt.Key.Key_Return:
-            self.refresh_map()
-            return
 
         self.refresh_map()
 
 
+def except_hook(cls, exception, traceback):
+    sys.__excepthook__(cls, exception, traceback)
+
+
 app = QApplication(sys.argv)
 main_window = MainWindow()
+sys.excepthook = except_hook
 main_window.show()
 sys.exit(app.exec())
