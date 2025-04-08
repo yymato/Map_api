@@ -1,3 +1,4 @@
+import math
 import sys
 from math import degrees, atan, sinh, pi
 
@@ -46,7 +47,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton and self.map_label.geometry().contains(event.pos()):
-            print(1)
             x, y = event.pos().x(), event.pos().y()
 
             left_map = self.map_label.geometry().left()
@@ -63,7 +63,42 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             self.lineEdit.setText(f'{lon}, {lat}')
             self.searc2()
+        if event.button() == Qt.MouseButton.RightButton and self.map_label.geometry().contains(event.pos()):
+            x, y = event.pos().x(), event.pos().y()
 
+            left_map = self.map_label.geometry().left()
+            width_map = self.map_label.geometry().width()
+            top_map = self.map_label.geometry().top()
+            height_map = self.map_label.geometry().height()
+
+            cursor_x = (x - left_map) / width_map
+            cursor_y = (y - top_map) / height_map
+
+            k = 2
+            lon = self.map_ll[0] - (360 / (k ** (self.map_zoom - 1)) / 2) + cursor_x * 360 / (k ** (self.map_zoom - 1))
+            lat = self.map_ll[1] + (180 / (k ** (self.map_zoom - 1)) / 2) - cursor_y * 180 / (k ** (self.map_zoom - 1))
+
+            org = MainWindow.get_company(f'{lat},{lon}')
+            dist = MainWindow.lonlat_dist(f'{lat},{lon}', org[0])
+            if dist <= 50:
+                self.lineEdit.setText(' '.join(org))
+                self.searc1()
+
+    @staticmethod
+    def lonlat_dist(self_point, org_point):
+        self_x, self_y = map(float, self_point.split(','))
+        org_x, org_y = map(float, org_point.split(','))
+
+        x = abs(self_x - org_x)
+        y = abs(self_y - org_y)
+        median_lat = (self_y + org_y) / 2
+
+        x_meters = (6400 * 1000) * math.cos(math.radians(median_lat)) * math.radians(x)
+        y_meters = (6400 * 1000) * math.radians(y)
+
+        distance = math.sqrt(x_meters ** 2 + y_meters ** 2)
+        print(distance)
+        return distance
 
     def reset_result(self):
         self.lineEdit.setText('')
@@ -148,6 +183,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.map_ll[1] -= self.press_delta
 
         self.refresh_map()
+
+    @staticmethod
+    def get_company(self_point):
+        search_api_server = "https://search-maps.yandex.ru/v1/"
+        api_key = "dda3ddba-c9ea-4ead-9010-f43fbc15c6e3"
+
+        search_params = {
+            "apikey": api_key,
+            "text": "Аптека",
+            "lang": "ru_RU",
+            "ll": self_point,
+            "type": "biz"
+        }
+
+        response = requests.get(search_api_server, params=search_params)
+        if not response:
+            # ...
+            pass
+
+        # Преобразуем ответ в json-объект
+        json_response = response.json()
+        print(json_response)
+        org = json_response["features"][0]
+        org_point = f"{org["geometry"]["coordinates"][0]},{org["geometry"]["coordinates"][1]}"
+        return (org_point, org["properties"]["CompanyMetaData"]["name"])
+
 
 
 def except_hook(cls, exception, traceback):
