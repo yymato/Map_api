@@ -78,14 +78,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             lon = self.map_ll[0] - (360 / (k ** (self.map_zoom - 1)) / 2) + cursor_x * 360 / (k ** (self.map_zoom - 1))
             lat = self.map_ll[1] + (180 / (k ** (self.map_zoom - 1)) / 2) - cursor_y * 180 / (k ** (self.map_zoom - 1))
 
-            org = MainWindow.get_company(f'{lat},{lon}')
-            dist = MainWindow.lonlat_dist(f'{lat},{lon}', org[0])
+            org = MainWindow.get_company(f'{lon},{lat}')
+            dist = MainWindow.lonlat_dist(f'{lon},{lat}', org[0])
             if dist <= 50:
-                self.lineEdit.setText(' '.join(org))
+                self.lineEdit.setText(org[0])
                 self.searc1()
 
     @staticmethod
     def lonlat_dist(self_point, org_point):
+        print(self_point, org_point)
         self_x, self_y = map(float, self_point.split(','))
         org_x, org_y = map(float, org_point.split(','))
 
@@ -160,11 +161,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         response = requests.get('https://static-maps.yandex.ru/v1', params=map_params)
         print(response.url)
-        with open('tmp.png', mode='wb') as tmp:
+        with open('tmp.jpg', mode='wb') as tmp:
             tmp.write(response.content)
 
         pixmap = QPixmap()
-        pixmap.load('tmp.png')
+        pixmap.load('tmp.jpg')
         self.map_label.setPixmap(pixmap)
 
     def keyPressEvent(self, event):
@@ -196,10 +197,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "ll": self_point,
             "type": "biz"
         }
-
+        print(self_point)
         response = requests.get(search_api_server, params=search_params)
         if not response:
-            # ...
+
             pass
 
         # Преобразуем ответ в json-объект
@@ -207,7 +208,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         print(json_response)
         org = json_response["features"][0]
         org_point = f"{org["geometry"]["coordinates"][0]},{org["geometry"]["coordinates"][1]}"
-        return (org_point, org["properties"]["CompanyMetaData"]["name"])
+        return org_point, org["properties"]["CompanyMetaData"]["name"]
 
 
 
