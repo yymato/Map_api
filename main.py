@@ -19,7 +19,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.press_delta = 0.1
         self.theme = 'light'
-        self.map_zoom = 5
+        self.map_zoom = 15
         self.map_ll = [37.977751, 55.757718]
         self.point = ','.join(list(map(str, [37.977751, 55.757718])))
         self.map_l = 'map'
@@ -78,11 +78,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             lon = self.map_ll[0] - (360 / (k ** (self.map_zoom - 1)) / 2) + cursor_x * 360 / (k ** (self.map_zoom - 1))
             lat = self.map_ll[1] + (180 / (k ** (self.map_zoom - 1)) / 2) - cursor_y * 180 / (k ** (self.map_zoom - 1))
 
-            org = MainWindow.get_company(f'{lon},{lat}')
-            dist = MainWindow.lonlat_dist(f'{lon},{lat}', org[0])
-            if dist <= 50:
-                self.lineEdit.setText(org[0])
-                self.searc1()
+            nearest_org, distance = self.find_nearest_organization(f"{lon},{lat}")
+
+            if nearest_org:
+                org_point, org_name, category = nearest_org
+                self.plainTextEdit.setPlainText(f"{org_name} ({category}, {distance} м)")
+                self.point = org_point
+                self.refresh_map()
+            else:
+                self.lineEdit.setText("Организации не найдены")
 
     @staticmethod
     def lonlat_dist(self_point, org_point):
@@ -108,6 +112,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.point = ','.join(list(map(str, [37.977751, 55.757718])))
         self.refresh_map()
 
+    def find_nearest_organization(self, self_point):
+        categories = [
+            "аптека", "больница", "поликлиника",
+            "магазин", "супермаркет", "продукты",
+            "кафе", "ресторан", "столовая",
+            "банк", "банкомат", "обмен валют",
+            "заправка", "автосервис", "шиномонтаж",
+            "отель", "гостиница", "хостел",
+            "парк", "сквер", "достопримечательность"
+        ]
+
+        nearest_org = tuple()
+        min_distance = float('inf')
+
+        for category in categories:
+            org_data = self.get_company(self_point, category)
+            if org_data:
+                org_point, org_name = org_data
+                distance = self.lonlat_dist(self_point, org_point)
+
+                if distance < min_distance:
+                    min_distance = distance
+                    nearest_org = (org_point, org_name, category)
+
+        return nearest_org, min_distance if nearest_org else (None, None)
+
     def get_coords_from_geocoder(self, toponym_to_find, address=False, index=False):
         geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
 
@@ -132,7 +162,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if index:
                 try:
                     return (toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted'] + ', ' +
-                        toponym['metaDataProperty']['GeocoderMetaData']['Address']["postal_code"])
+                            toponym['metaDataProperty']['GeocoderMetaData']['Address']["postal_code"])
                 except Exception:
                     return toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
             return toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
@@ -156,8 +186,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             'apikey': '92bf06ed-e9bb-4a7b-8b91-23cf32fb910d',
 
         }
-
-
 
         response = requests.get('https://static-maps.yandex.ru/v1', params=map_params)
         print(response.url)
@@ -186,30 +214,36 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.refresh_map()
 
     @staticmethod
-    def get_company(self_point):
+    def get_company(self_point, text):
         search_api_server = "https://search-maps.yandex.ru/v1/"
         api_key = "dda3ddba-c9ea-4ead-9010-f43fbc15c6e3"
 
         search_params = {
             "apikey": api_key,
-            "text": "Аптека",
+            "text": text,
             "lang": "ru_RU",
             "ll": self_point,
             "type": "biz"
         }
-        print(self_point)
-        response = requests.get(search_api_server, params=search_params)
-        if not response:
+        try:
+            response = requests.get(search_api_server, params=search_params)
+            if not response:
+                print(response.content)
+                print(response.reason)
+                return None
 
-            pass
+            json_response = response.json()
+            features = json_response.get("features")
+            print(json_response)
+            if not features:
+                return None
 
-        # Преобразуем ответ в json-объект
-        json_response = response.json()
-        print(json_response)
-        org = json_response["features"][0]
-        org_point = f"{org["geometry"]["coordinates"][0]},{org["geometry"]["coordinates"][1]}"
-        return org_point, org["properties"]["CompanyMetaData"]["name"]
-
+            org = features[0]
+            org_point = f"{org['geometry']['coordinates'][0]},{org['geometry']['coordinates'][1]}"
+            org_name = org["properties"]["CompanyMetaData"]["name"]
+            return org_point, org_name
+        except IndexError:
+            return None
 
 
 def except_hook(cls, exception, traceback):
