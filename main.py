@@ -19,9 +19,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.press_delta = 0.1
         self.theme = 'light'
-        self.map_zoom = 15
-        self.map_ll = [37.977751, 55.757718]
-        self.point = ','.join(list(map(str, [37.977751, 55.757718])))
+        self.map_zoom = 17
+        self.map_ll = [37.971724, 55.756960]
+        self.point = ','.join(list(map(str, [37.971724, 55.756960])))
         self.map_l = 'map'
         self.map_key = ''
         self.theme_button.clicked.connect(self.change_theme)
@@ -80,7 +80,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             nearest_org, distance = self.find_nearest_organization(f"{lon},{lat}")
 
-            if nearest_org:
+            if nearest_org and distance < 50:
                 org_point, org_name, category = nearest_org
                 self.plainTextEdit.setPlainText(f"{org_name} ({category}, {distance} м)")
                 self.point = org_point
